@@ -2,7 +2,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-public partial class Program
+using Microsoft.EntityFrameworkCore;
+using ExpenseTrackerApi.Data;
+
+
+public class Program
 {
     public static void Main(string[] args)
     {
@@ -23,6 +27,8 @@ public partial class Program
                 };
             });
 
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -35,16 +41,12 @@ public partial class Program
             app.UseSwaggerUI();
         }
 
-        app.UseHttpsRedirection();
-
-        app.UseAuthorization();
-        app.UseAuthentication();
+        //app.UseAuthentication();
+        //app.UseAuthorization();
 
         app.MapControllers();
 
-        app.MapGet("/", () => "Hello World!");
-        app.MapGet("/expense", () => "Hello from the root endpoint!");
-
+        app.UseRouting();
         app.Run();
     }
 }
