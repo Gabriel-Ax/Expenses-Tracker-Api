@@ -7,6 +7,7 @@ using ExpenseTrackerApi.Models;
 
 namespace ExpenseTrackerApi.Controllers
 {
+    [Authorize]
     [Route("/api")]
     [ApiController]
     public class ExpenseController : ControllerBase
@@ -23,8 +24,12 @@ namespace ExpenseTrackerApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetExpenses()
+        public IActionResult TestController()
         {
+            if (!_env.IsDevelopment())
+            {
+                return NotFound();
+            }
             return Ok("Hello from ExpenseController!");
         }
 
@@ -39,8 +44,19 @@ namespace ExpenseTrackerApi.Controllers
             return Ok(expense);
         }
 
-        [HttpPost("new/no-async")]
-        public IActionResult CreateExpenseNoAsync([FromBody] Expense expense)
+        [HttpGet("all")]
+        public IActionResult GetAllExpenses()
+        {
+            var expenses = _context.Expenses.ToList();
+            if (expenses == null || !expenses.Any())
+            {
+                return NotFound();
+            }
+            return Ok(expenses);
+        }
+
+        [HttpPost]
+        public IActionResult CreateExpense([FromBody] Expense expense)
         {
             _context.Expenses.Add((Expense)expense);
             _context.SaveChanges();
@@ -48,21 +64,24 @@ namespace ExpenseTrackerApi.Controllers
             return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id }, expense);
         }
 
-        [HttpPost("new/deprecated")]
-        public IActionResult CreateExpenseAsync([FromBody] object expense)
+        [HttpPut("{id}")]
+        public IActionResult UpdateExpenseById([FromBody] Expense updatedExpense, int id)
         {
-            var expenseCast = (Expense)expense;
-            _context.Expenses.Add(expenseCast);
-            //await _context.SaveChangesAsync();
+            var expense = _context.Expenses.Find(id);
+            if (expense == null)
+            {
+                return NotFound();
+            }
 
-            return CreatedAtAction(nameof(GetExpenseById), new { id = expenseCast.Id }, expense);
+            expense.Name = updatedExpense.Name ?? expense.Name;
+            expense.Amount = updatedExpense.Amount != 0 ? updatedExpense.Amount : expense.Amount;
+            expense.Date = updatedExpense.Date;
+            expense.Category = updatedExpense.Category ?? expense.Category;
+
+            _context.SaveChanges();
+            return NoContent();
         }
 
-        [HttpPost]
-        public IActionResult CreateExpenseWithId(int id, [FromBody] object expense)
-        {
-            return CreatedAtAction(nameof(GetExpenseById), new { id }, expense);
-        }
 
         [HttpDelete("all")]
         public IActionResult DeleteAllExpenses()
@@ -78,14 +97,13 @@ namespace ExpenseTrackerApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteExpense(int id)
+        public IActionResult DeleteExpenseById(int id)
         {
             var expense = _context.Expenses.Find(id);
             if (expense == null)
             {
-                return NotFound();
+                return NoContent();
             }
-
             _context.Expenses.Remove(expense);
             _context.SaveChanges();
 
