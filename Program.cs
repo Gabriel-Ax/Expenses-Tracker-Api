@@ -41,12 +41,13 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        //app.UseAuthentication();
-        //app.UseAuthorization();
+        app.UseRouting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapControllers();
 
-        app.UseRouting();
         app.Run();
     }
 }

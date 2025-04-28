@@ -7,7 +7,7 @@ using ExpenseTrackerApi.Models;
 
 namespace ExpenseTrackerApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/auth/")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace ExpenseTrackerApi.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
-            if (loginRequest.Username == "admin" && loginRequest.Password == "password")
+            if (loginRequest.Username == "user" && loginRequest.Password == "password")
             {
                 var token = GenerateJwtToken(loginRequest.Username);
                 return Ok(new LoginResponse { Token = token, Username = loginRequest.Username});

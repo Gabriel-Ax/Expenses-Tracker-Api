@@ -13,7 +13,11 @@ namespace ExpenseTrackerApi.Models
 
         [Required]
         public int Amount { get; set; }
+        
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        [DataType(DataType.Date)]
         public DateTime Date { get; set; }
+        [Required]
         public string Category { get; set; }
     }
 }
